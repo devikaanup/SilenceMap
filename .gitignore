@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+backend/venv/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend_new/test-main/node_modules/
+frontend/dist/
+frontend_new/test-main/dist/
+.npm
+*.log
+
+# OS & Archives
+.DS_Store
+**/.DS_Store
+*.zip
+.env
+
+# Temp & Agent Metadata
+/tmp/silence_map_uploads/
+.superpowers/
+.impeccable/
+
