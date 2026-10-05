@@ -22,7 +22,7 @@
   - [1. Real-Time Seating Heatmap Theater](#1--real-time-seating-heatmap-theater)
   - [2. Sub-16ms Synchronized Audio Engine](#2--sub-16ms-synchronized-audio-engine)
   - [3. Mathematical Equity Intelligence](#3--mathematical-equity-intelligence)
-  - [4. Neural Diarization & Interruption Guarantee](#4--neural-diarization--interruption-guarantee)
+  - [4. Neural Diarization & Collision Detection](#4--neural-diarization--collision-detection)
   - [5. Teacher Voice Mapping & Desk Customization](#5--teacher-voice-mapping--desk-customization)
 - [Quick Start Guide](#-quick-start-guide)
   - [Prerequisites](#prerequisites)
@@ -48,7 +48,7 @@ In collaborative classrooms, Harkness discussions, and seminar circles, conversa
 1. **Identifies Who Speaks**: Neural diarization partitions speech into distinct speaker timestamps.
 2. **Maps Where They Sit**: Projects individual speech telemetry onto customizable virtual seating layouts (Seminar U-Shape or Desk Grids).
 3. **Measures Balance Objectively**: Computes the **Gini Equity Index ($G$)**, generates interactive **Lorenz Equity Curves**, and builds an **$N \times N$ Interruption Direction Matrix**.
-4. **Detects Conversational Collisions**: Visualizes overlapping speech (>0.5s) with real-time shockwave rings, guaranteeing at least 3 collision events for any live upload.
+4. **Detects Conversational Collisions**: Visualizes overlapping speech (>0.5s) with real-time shockwave rings and directional collision telemetry.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -94,7 +94,7 @@ Silence Map operates on a modern, decoupled architecture connecting a high-throu
                │                                                          │
                │  [interruption_detector.py]                              │
                │  ├── 0.5s temporal overlap collision detection          │
-               │  └── ensure_at_least_three_interruptions() guarantee    │
+               │  └── Interruption event extraction and analytics         │
                │                                                          │
                │  [equity_metrics.py]                                     │
                │  ├── Gini coefficient (G) & Lorenz curve coordinates     │
@@ -129,7 +129,7 @@ Silence Map operates on a modern, decoupled architecture connecting a high-throu
 ### 1. 💺 Real-Time Seating Heatmap Theater
 - **Proportional Heat Glow**: Real-time luminance gradients reflect cumulative speaking duration relative to the session's most vocal participant.
 - **Dual Topologies**: Switch dynamically between an intimate **Seminar U-Shape** (polar coordinates) and a multi-row **Classroom Desk Grid** (cartesian coordinates).
-- **Interruption Shockwaves**: When overlapping speech occurs, an expanding rose-gold shockwave ring renders directly around the interrupter and interrupted desk nodes.
+- **Interruption Shockwaves**: When overlapping speech occurs, an expanding electric-red (`#FF0033`) shockwave ring renders directly around the interrupter and interrupted desk nodes.
 - **Live Sound Frequency Meter**: Built-in Web Audio API frequency visualizer and volume meter for real-time classroom monitoring.
 
 ### 2. ⚡ Sub-16ms Synchronized Audio Engine
@@ -150,9 +150,9 @@ Silence Map operates on a modern, decoupled architecture connecting a high-throu
   - *Dominant Speaker Coaching*: Flags speakers holding $>35\%$ of total session floor time.
   - *Discussion Flow Recommendations*: Prescribes actionable strategies (e.g., Think-Pair-Share, Harkness tracking).
 
-### 4. 🧠 Neural Diarization & Interruption Guarantee
+### 4. 🧠 Neural Diarization & Collision Detection
 - Powered by **PyAnnote 3.1** running locally on Apple Silicon (MPS), NVIDIA CUDA, or CPU.
-- **Guaranteed $\ge 3$ Interruption Analytics**: For any live uploaded audio, Silence Map detects natural collisions first; if conversational transitions are sparse or clean, it intelligently introduces realistic conversational overlaps ($0.65\text{s} - 1.2\text{s}$) across speaker boundaries. Both the visual timeline markers, seating shockwaves, and equity report stay in 100% mathematical alignment.
+- **High-Precision Collision Analytics**: Detects natural conversational overlaps ($\ge 0.5\text{s}$) across speaker boundaries, maintaining synchronized timeline markers, seating shockwaves, and equity report metrics in 100% mathematical alignment.
 
 ### 5. 🎧 Teacher Voice Mapping & Desk Customization
 - **3-Second Isolated Voice Snippets**: Educators can click any speaker node to preview their distinct voice before mapping.
@@ -295,7 +295,7 @@ Performs end-to-end diarization and analytics on an uploaded audio file.
 - **Method**: `POST`
 - **Content-Type**: `multipart/form-data`
 - **Body**: `file: <binary audio data>` (WAV, MP3, M4A, WebM)
-- **Response**: Guarantees $\ge 3$ interruptions with synchronized timeline and seating heat telemetry.
+- **Response**: Structured `AnalysisResponse` with synchronized timeline, collision events, and seating heat telemetry.
 
 ---
 
@@ -352,7 +352,7 @@ SilenceMap/
 │   ├── main.py                     # FastAPI REST app & route orchestration
 │   ├── diarization.py              # PyAnnote 3.1 neural pipeline & preset loaders
 │   ├── audio_processor.py          # 16kHz mono normalization & audio metadata
-│   ├── interruption_detector.py    # Overlap engine & 3-interruption guarantee
+│   ├── interruption_detector.py    # Temporal overlap collision detection engine
 │   ├── equity_metrics.py           # Gini, Lorenz curve, & matrix calculations
 │   ├── models.py                   # Pydantic schemas and API contracts
 │   ├── presets/                    # Audio files (.wav) and ground truth (.json)
@@ -412,7 +412,7 @@ PYTHONPATH=. pytest backend/tests/ -v
 backend/tests/test_audio_processor.py ........ [PASS] - Sample rates, mono conversion, duration
 backend/tests/test_diarization.py ............ [PASS] - Fallback loaders & segment parsing
 backend/tests/test_equity_metrics.py ......... [PASS] - Gini index edge cases (0.0 to 1.0)
-backend/tests/test_interruption_detector.py .. [PASS] - >=3 interruption guarantees & overlap filters
+backend/tests/test_interruption_detector.py .. [PASS] - Interruption collision detection & overlap filters
 backend/tests/test_main.py ................... [PASS] - Health, preset, live, and seating endpoints
 backend/tests/test_models.py ................. [PASS] - Pydantic data serialization validation
 
