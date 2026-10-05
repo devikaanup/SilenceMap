@@ -71,9 +71,14 @@ def run_live_diarization(audio_path: str, num_speakers: Optional[int] = None) ->
         raise RuntimeError("DIARIZATION_DEPENDENCY_MISSING: pyannote.audio is not installed on this host.")
         
     try:
-        pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=hf_token)
+        try:
+            pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", token=hf_token)
+        except TypeError:
+            pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=hf_token)
         if torch.cuda.is_available():
             pipeline.to(torch.device("cuda"))
+        elif torch.backends.mps.is_available():
+            pipeline.to(torch.device("mps"))
             
         kwargs = {}
         if num_speakers is not None and num_speakers > 0:

@@ -1,52 +1,52 @@
 {
   "id": "stem_collaboration",
   "title": "Collaborative STEM Lab Discussion",
-  "description": "4 students analyzing physics experiment findings with equitable turn-taking and minimal interruption.",
+  "description": "4 students planning a physics experiment; SPEAKER_02 cuts in on SPEAKER_00 near the end.",
   "speaker_count": 4,
-  "audio_duration": 62.0,
+  "audio_duration": 51.6,
   "audio_file": "stem_collaboration.wav",
   "segments": [
     {
       "speaker_id": "SPEAKER_00",
-      "start_time": 1.0,
-      "end_time": 9.0,
-      "duration": 8.0
+      "start_time": 0.0,
+      "end_time": 7.84,
+      "duration": 7.84
     },
     {
       "speaker_id": "SPEAKER_01",
-      "start_time": 9.5,
-      "end_time": 18.0,
-      "duration": 8.5
+      "start_time": 7.84,
+      "end_time": 16.36,
+      "duration": 8.52
     },
     {
       "speaker_id": "SPEAKER_02",
-      "start_time": 19.0,
-      "end_time": 28.0,
-      "duration": 9.0
+      "start_time": 16.36,
+      "end_time": 25.08,
+      "duration": 8.72
     },
     {
       "speaker_id": "SPEAKER_03",
-      "start_time": 28.5,
-      "end_time": 37.0,
-      "duration": 8.5
+      "start_time": 25.08,
+      "end_time": 31.6,
+      "duration": 6.52
     },
     {
       "speaker_id": "SPEAKER_00",
-      "start_time": 38.0,
-      "end_time": 45.0,
-      "duration": 7.0
+      "start_time": 31.6,
+      "end_time": 38.56,
+      "duration": 6.96
     },
     {
       "speaker_id": "SPEAKER_02",
-      "start_time": 44.2,
-      "end_time": 52.0,
-      "duration": 7.8
+      "start_time": 37.76,
+      "end_time": 48.0,
+      "duration": 10.24
     },
     {
       "speaker_id": "SPEAKER_01",
-      "start_time": 53.0,
-      "end_time": 60.0,
-      "duration": 7.0
+      "start_time": 48.0,
+      "end_time": 51.6,
+      "duration": 3.6
     }
   ]
 }

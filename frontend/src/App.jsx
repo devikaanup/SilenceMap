@@ -63,6 +63,7 @@ export default function App() {
       const res = await fetch(`/api/analyze/preset/${presetId}`, { method: 'POST' });
       if (!res.ok) throw new Error('Preset analysis request failed');
       const data = await res.json();
+      if (data.audio_url) data.audio_url = `${data.audio_url}?v=${Date.now()}`;
       setAnalysisData(data);
       setCurrentStep('mapping');
     } catch (err) {
@@ -100,6 +101,7 @@ export default function App() {
           errorMessage: data.error_message || 'Live diarization failed.'
         });
       } else {
+        if (data.audio_url) data.audio_url = `${data.audio_url}?v=${Date.now()}`;
         setAnalysisData(data);
         setCurrentStep('mapping');
       }

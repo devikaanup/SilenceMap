@@ -28,4 +28,6 @@ frontend_new/test-main/dist/
 /tmp/silence_map_uploads/
 .superpowers/
 .impeccable/
+backend/.tts_cache/
+
 

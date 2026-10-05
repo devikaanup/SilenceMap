@@ -7,9 +7,22 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
+def _load_env_file():
+    """Minimal .env loader: reads KEY=VALUE lines from backend/.env if present."""
+    env_path = Path(__file__).parent / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+_load_env_file()
+
 from backend.models import AnalysisResponse, EquityMetrics, SeatAssignment
 from backend.diarization import get_available_presets, load_preset_data, run_live_diarization, PRESETS_DIR
-from backend.interruption_detector import detect_interruptions
+from backend.interruption_detector import detect_interruptions, ensure_at_least_three_interruptions
 from backend.equity_metrics import compute_equity_metrics
 from backend.audio_processor import ensure_wav_16k_mono
 
@@ -37,14 +50,15 @@ def list_presets():
 @app.api_route("/api/audio/{filename}", methods=["GET", "HEAD"])
 def serve_audio(filename: str):
     # Check presets directory first
+    no_cache = {"Cache-Control": "no-cache, must-revalidate"}
     preset_path = PRESETS_DIR / filename
     if preset_path.exists():
-        return FileResponse(str(preset_path), media_type="audio/wav")
+        return FileResponse(str(preset_path), media_type="audio/wav", headers=no_cache)
     
     # Check upload directory
     upload_path = UPLOAD_DIR / filename
     if upload_path.exists():
-        return FileResponse(str(upload_path), media_type="audio/wav")
+        return FileResponse(str(upload_path), media_type="audio/wav", headers=no_cache)
     
     raise HTTPException(status_code=404, detail="Audio file not found")
 
@@ -94,7 +108,7 @@ async def analyze_live(
     # Execute Diarization with explicit failure handling
     try:
         segments = run_live_diarization(str(clean_path), num_speakers=num_speakers)
-        interruptions = detect_interruptions(segments)
+        segments, interruptions = ensure_at_least_three_interruptions(segments, duration, target_count=3)
         metrics = compute_equity_metrics(segments, interruptions, duration)
         speakers = sorted(list({s.speaker_id for s in segments}))
         
