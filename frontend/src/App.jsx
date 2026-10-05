@@ -82,14 +82,44 @@ export default function App() {
     setIsLoading(true);
     setErrorData(null);
 
+    // Create a local blob URL for the custom audio file so it plays directly in the browser
+    const localAudioBlobUrl = URL.createObjectURL(file);
+
+    // Pre-measure exact audio duration directly in the browser
+    let customAudioDuration = null;
+    try {
+      customAudioDuration = await new Promise((resolve) => {
+        const probeAudio = new Audio();
+        probeAudio.src = localAudioBlobUrl;
+        probeAudio.onloadedmetadata = () => {
+          if (probeAudio.duration && isFinite(probeAudio.duration) && probeAudio.duration > 0) {
+            resolve(Math.round(probeAudio.duration * 100) / 100);
+          } else {
+            resolve(null);
+          }
+        };
+        probeAudio.onerror = () => resolve(null);
+        setTimeout(() => resolve(null), 1200);
+      });
+    } catch (_) {
+      customAudioDuration = null;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     if (numSpeakersHint) {
       formData.append('num_speakers', numSpeakersHint);
     }
+    if (customAudioDuration) {
+      formData.append('duration', customAudioDuration.toString());
+    }
 
     try {
-      const res = await fetch('/api/analyze/live', {
+      const urlWithQuery = customAudioDuration
+        ? `/api/analyze/live?duration=${encodeURIComponent(customAudioDuration)}${numSpeakersHint ? `&num_speakers=${numSpeakersHint}` : ''}`
+        : `/api/analyze/live${numSpeakersHint ? `?num_speakers=${numSpeakersHint}` : ''}`;
+
+      const res = await fetch(urlWithQuery, {
         method: 'POST',
         body: formData
       });
@@ -101,7 +131,11 @@ export default function App() {
           errorMessage: data.error_message || 'Live diarization failed.'
         });
       } else {
-        if (data.audio_url) data.audio_url = `${data.audio_url}?v=${Date.now()}`;
+        // ALWAYS use the user's exact uploaded file URL for custom audio playback
+        data.audio_url = localAudioBlobUrl;
+        if (customAudioDuration && (!data.audio_duration || data.audio_duration <= 0)) {
+          data.audio_duration = customAudioDuration;
+        }
         setAnalysisData(data);
         setCurrentStep('mapping');
       }
