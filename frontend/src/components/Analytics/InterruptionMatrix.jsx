@@ -31,30 +31,32 @@ export default function InterruptionMatrix({
   const totalInterruptions = interruptions.length;
 
   return (
-    <div className="glass-card" style={{ padding: '1.25rem', overflowX: 'auto' }}>
+    <div className="glass-card" style={{ padding: '1.25rem', overflowX: 'auto', border: totalInterruptions > 0 ? '1.5px solid rgba(255, 0, 51, 0.3)' : undefined }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-          <ShieldAlert size={16} color="#DC2626" />
+          <ShieldAlert size={18} color="#FF0033" strokeWidth={2.6} />
           <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#231A12', fontFamily: 'Playfair Display, Georgia, serif', margin: 0 }}>
             Interruption Direction Matrix
           </h4>
         </div>
         <span style={{
           fontSize: '0.75rem',
-          color: '#B91C1C',
-          background: '#FEE2E2',
-          border: '1px solid #FECACA',
-          padding: '0.2rem 0.65rem',
+          color: '#FFFFFF',
+          background: '#FF0033',
+          border: '1.5px solid #FF1744',
+          boxShadow: '0 0 14px rgba(255, 0, 51, 0.75)',
+          padding: '0.25rem 0.75rem',
           borderRadius: '9999px',
           fontFamily: 'JetBrains Mono, monospace',
-          fontWeight: 700
+          fontWeight: 800,
+          letterSpacing: '0.02em'
         }}>
           Total Collisions: <strong>{totalInterruptions}</strong>
         </span>
       </div>
 
       <p style={{ fontSize: '0.78rem', color: '#6B5A4E', marginBottom: '1rem' }}>
-        Rows indicate who initiated the interruption; columns indicate who was interrupted.
+        Rows indicate who initiated the interruption; columns indicate who was interrupted. Collisions are highlighted in <strong style={{ color: '#FF0033' }}>extremely bright red (#FF0033)</strong>.
       </p>
 
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'center' }}>
@@ -88,21 +90,20 @@ export default function InterruptionMatrix({
                     style={{
                       padding: '0.5rem 0.6rem',
                       background: hasCount
-                        ? count > 1
-                          ? '#FEE2E2'
-                          : '#FEF3C7'
+                        ? '#FF0033'
                         : isSelf
                         ? '#FAF4ED'
                         : 'transparent',
                       color: hasCount
-                        ? count > 1
-                          ? '#B91C1C'
-                          : '#B45309'
+                        ? '#FFFFFF'
                         : isSelf
                         ? '#C4B5A5'
                         : '#8A7565',
-                      fontWeight: hasCount ? 800 : 400,
-                      borderRadius: '4px'
+                      fontWeight: hasCount ? 900 : 400,
+                      fontSize: hasCount ? '0.85rem' : '0.78rem',
+                      borderRadius: hasCount ? '6px' : '0px',
+                      border: hasCount ? '1.5px solid #FF3366' : 'none',
+                      boxShadow: hasCount ? '0 0 14px rgba(255, 0, 51, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.4)' : 'none'
                     }}
                   >
                     {count}

@@ -116,12 +116,14 @@ export default function AudioSyncEngine({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentTime, duration, togglePlay, seek, toggleMute]);
 
+  const getStudentName = (spkId) => {
+    const seat = seats.find((s) => s.speaker_id === spkId);
+    return seat?.student_name || spkId;
+  };
+
   // Compute active speaker name
   const activeSpeakerNames = activeSpeakers
-    .map((spkId) => {
-      const seat = seats.find((s) => s.speaker_id === spkId);
-      return seat?.student_name || spkId;
-    })
+    .map(getStudentName)
     .filter(Boolean);
 
   const displayTime = isScrubbing ? scrubVal : currentTime;
@@ -130,29 +132,37 @@ export default function AudioSyncEngine({
 
   return (
     <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', width: '100%', maxWidth: '820px' }}>
-      {/* Interruption Live Banner Alert */}
+      {/* Interruption Live Banner Alert - Extremely Bright Red */}
       {activeInterruption && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0.5rem 1rem',
-          borderRadius: '0.65rem',
-          background: '#FEE2E2',
-          border: '1px solid #FECACA',
+          padding: '0.65rem 1.25rem',
+          borderRadius: '0.75rem',
+          background: '#FF0033',
+          border: '2px solid #FF3366',
+          boxShadow: '0 0 25px rgba(255, 0, 51, 0.9), 0 4px 14px rgba(255, 0, 51, 0.6)',
           marginBottom: '1rem',
-          color: '#B91C1C',
-          fontSize: '0.82rem',
-          fontWeight: 700,
+          color: '#FFFFFF',
+          fontSize: '0.85rem',
+          fontWeight: 800,
           fontFamily: 'JetBrains Mono, monospace',
-          animation: 'activeSpeakerGlow 0.8s infinite'
+          animation: 'interruptionAlertPulse 0.8s infinite alternate'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-            <ShieldAlert size={16} color="#DC2626" />
-            <span>INTERRUPTION DETECTED</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+            <ShieldAlert size={18} color="#FFFFFF" strokeWidth={2.8} />
+            <span style={{ letterSpacing: '0.04em' }}>💥 INTERRUPTION COLLISION DETECTED</span>
           </div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>
-            {activeInterruption.interrupter_id} interrupted {activeInterruption.interrupted_id} ({activeInterruption.overlap_duration.toFixed(1)}s collision)
+          <span style={{
+            fontSize: '0.78rem',
+            fontWeight: 800,
+            background: 'rgba(0, 0, 0, 0.28)',
+            padding: '0.25rem 0.65rem',
+            borderRadius: '5px',
+            border: '1px solid rgba(255, 255, 255, 0.4)'
+          }}>
+            {getStudentName(activeInterruption.interrupter_id)} interrupted {getStudentName(activeInterruption.interrupted_id)} ({activeInterruption.overlap_duration.toFixed(1)}s overlap)
           </span>
         </div>
       )}

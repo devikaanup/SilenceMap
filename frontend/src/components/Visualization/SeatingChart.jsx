@@ -144,6 +144,7 @@ export default function SeatingChart({
               {seats.slice(0, 4).map((seat, idx) => {
                 const isSpeaking = seat.speaker_id && activeSpeakers.includes(seat.speaker_id);
                 const isInterrupter = activeInterruption && activeInterruption.interrupter_id === seat.speaker_id;
+                const isInterrupted = activeInterruption && activeInterruption.interrupted_id === seat.speaker_id;
                 const cumTime = seat.speaker_id ? (cumulativeTalkTime[seat.speaker_id] || 0) : 0;
 
                 return (
@@ -152,6 +153,7 @@ export default function SeatingChart({
                     seat={seat}
                     isSpeaking={isSpeaking}
                     isInterrupter={isInterrupter}
+                    isInterrupted={isInterrupted}
                     cumulativeTime={cumTime}
                     maxCumulativeTime={maxCumulativeTime}
                     speakerIndex={idx}
@@ -167,6 +169,7 @@ export default function SeatingChart({
                 {seats.slice(4, 6).map((seat, idx) => {
                   const isSpeaking = seat.speaker_id && activeSpeakers.includes(seat.speaker_id);
                   const isInterrupter = activeInterruption && activeInterruption.interrupter_id === seat.speaker_id;
+                  const isInterrupted = activeInterruption && activeInterruption.interrupted_id === seat.speaker_id;
                   const cumTime = seat.speaker_id ? (cumulativeTalkTime[seat.speaker_id] || 0) : 0;
 
                   return (
@@ -175,6 +178,7 @@ export default function SeatingChart({
                       seat={seat}
                       isSpeaking={isSpeaking}
                       isInterrupter={isInterrupter}
+                      isInterrupted={isInterrupted}
                       cumulativeTime={cumTime}
                       maxCumulativeTime={maxCumulativeTime}
                       speakerIndex={idx + 4}
@@ -203,6 +207,7 @@ export default function SeatingChart({
                 {seats.slice(6, 8).map((seat, idx) => {
                   const isSpeaking = seat.speaker_id && activeSpeakers.includes(seat.speaker_id);
                   const isInterrupter = activeInterruption && activeInterruption.interrupter_id === seat.speaker_id;
+                  const isInterrupted = activeInterruption && activeInterruption.interrupted_id === seat.speaker_id;
                   const cumTime = seat.speaker_id ? (cumulativeTalkTime[seat.speaker_id] || 0) : 0;
 
                   return (
@@ -211,6 +216,7 @@ export default function SeatingChart({
                       seat={seat}
                       isSpeaking={isSpeaking}
                       isInterrupter={isInterrupter}
+                      isInterrupted={isInterrupted}
                       cumulativeTime={cumTime}
                       maxCumulativeTime={maxCumulativeTime}
                       speakerIndex={idx + 6}
@@ -226,6 +232,7 @@ export default function SeatingChart({
                 {seats.slice(8, 12).map((seat, idx) => {
                   const isSpeaking = seat.speaker_id && activeSpeakers.includes(seat.speaker_id);
                   const isInterrupter = activeInterruption && activeInterruption.interrupter_id === seat.speaker_id;
+                  const isInterrupted = activeInterruption && activeInterruption.interrupted_id === seat.speaker_id;
                   const cumTime = seat.speaker_id ? (cumulativeTalkTime[seat.speaker_id] || 0) : 0;
 
                   return (
@@ -234,6 +241,7 @@ export default function SeatingChart({
                       seat={seat}
                       isSpeaking={isSpeaking}
                       isInterrupter={isInterrupter}
+                      isInterrupted={isInterrupted}
                       cumulativeTime={cumTime}
                       maxCumulativeTime={maxCumulativeTime}
                       speakerIndex={idx + 8}
@@ -256,6 +264,7 @@ export default function SeatingChart({
             {seats.map((seat, idx) => {
               const isSpeaking = seat.speaker_id && activeSpeakers.includes(seat.speaker_id);
               const isInterrupter = activeInterruption && activeInterruption.interrupter_id === seat.speaker_id;
+              const isInterrupted = activeInterruption && activeInterruption.interrupted_id === seat.speaker_id;
               const cumTime = seat.speaker_id ? (cumulativeTalkTime[seat.speaker_id] || 0) : 0;
 
               return (
@@ -264,6 +273,7 @@ export default function SeatingChart({
                   seat={seat}
                   isSpeaking={isSpeaking}
                   isInterrupter={isInterrupter}
+                  isInterrupted={isInterrupted}
                   cumulativeTime={cumTime}
                   maxCumulativeTime={maxCumulativeTime}
                   speakerIndex={idx}
@@ -307,8 +317,8 @@ export default function SeatingChart({
             <span style={{ fontWeight: 600 }}>Speaking Now</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#E07A5F', boxShadow: '0 0 6px rgba(224, 122, 95, 0.6)' }} />
-            <span style={{ fontWeight: 600 }}>Interruption Shockwave</span>
+            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FF0033', boxShadow: '0 0 10px rgba(255, 0, 51, 0.95), 0 0 4px #FF0033' }} />
+            <span style={{ fontWeight: 800, color: '#D9002C' }}>Interruption Collision</span>
           </div>
         </div>
       </div>

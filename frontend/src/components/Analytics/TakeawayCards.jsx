@@ -1,10 +1,11 @@
 import React from 'react';
-import { Lightbulb, CheckCircle, AlertCircle, Users2, Sparkles } from 'lucide-react';
+import { Lightbulb, CheckCircle, AlertCircle, Users2, Sparkles, ShieldAlert } from 'lucide-react';
 
 export default function TakeawayCards({
   metrics,
   speakers = [],
-  seats = []
+  seats = [],
+  interruptions = []
 }) {
   if (!metrics) return null;
 
@@ -26,6 +27,13 @@ export default function TakeawayCards({
     (s) => (speakerStats[s]?.talk_time_pct || 0) < 10
   );
 
+  // Identify top interrupter if any
+  const interrupterCounts = {};
+  interruptions.forEach((intEvt) => {
+    interrupterCounts[intEvt.interrupter_id] = (interrupterCounts[intEvt.interrupter_id] || 0) + 1;
+  });
+  const topInterrupter = Object.entries(interrupterCounts).sort((a, b) => b[1] - a[1])[0];
+
   return (
     <div style={{ marginTop: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.85rem' }}>
@@ -36,7 +44,50 @@ export default function TakeawayCards({
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-        {/* Card 1: Balance Assessment */}
+        {/* Card 1: Interruption Collisions Alert - Bright Red */}
+        {interruptions.length > 0 && (
+          <div
+            style={{
+              padding: '1.25rem',
+              borderRadius: '1rem',
+              background: '#FFF0F2',
+              border: '2px solid rgba(255, 0, 51, 0.65)',
+              boxShadow: '0 4px 16px rgba(255, 0, 51, 0.15)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ShieldAlert size={18} color="#FF0033" strokeWidth={2.6} />
+                <h5 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#231A12', fontFamily: 'Playfair Display, Georgia, serif', margin: 0 }}>
+                  Interruption Collisions
+                </h5>
+              </div>
+              <span style={{
+                fontSize: '0.68rem',
+                color: '#FFFFFF',
+                background: '#FF0033',
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                fontWeight: 900,
+                fontFamily: 'JetBrains Mono, monospace',
+                boxShadow: '0 0 10px rgba(255, 0, 51, 0.75)'
+              }}>
+                {interruptions.length} DETECTED
+              </span>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#6B5A4E', lineHeight: 1.6, margin: 0 }}>
+              {topInterrupter ? (
+                <>
+                  <strong style={{ color: '#FF0033' }}>{getStudentName(topInterrupter[0])}</strong> initiated {topInterrupter[1]} speech collision{topInterrupter[1] > 1 ? 's' : ''}. Emphasize conversational turn etiquette and 2-second buffer pauses before interjecting.
+                </>
+              ) : (
+                'Multiple overlapping speech collisions occurred during floor transitions.'
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Card 2: Balance Assessment */}
         <div
           style={{
             padding: '1.25rem',
@@ -63,7 +114,7 @@ export default function TakeawayCards({
           </p>
         </div>
 
-        {/* Card 2: Dominance & Listening Coaching */}
+        {/* Card 3: Dominance & Listening Coaching */}
         <div
           style={{
             padding: '1.25rem',
@@ -86,7 +137,7 @@ export default function TakeawayCards({
           </p>
         </div>
 
-        {/* Card 3: Invitation Strategy for Quiet Students */}
+        {/* Card 4: Invitation Strategy for Quiet Students */}
         <div
           style={{
             padding: '1.25rem',

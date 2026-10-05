@@ -110,11 +110,13 @@ export default function TimelineBar({
                 position: 'absolute',
                 left: `${leftPct}%`,
                 width: `${widthPct}%`,
-                top: '38px',
-                height: '14px',
-                background: '#E07A5F',
+                top: '36px',
+                height: '18px',
+                background: '#FF0033',
                 borderRadius: '3px',
-                boxShadow: '0 1px 6px rgba(224, 122, 95, 0.6)'
+                boxShadow: '0 0 12px rgba(255, 0, 51, 0.95), 0 0 4px #FF0033',
+                border: '1px solid #FFFFFF',
+                zIndex: 6
               }}
             />
           );
@@ -144,9 +146,9 @@ export default function TimelineBar({
             <span>{getStudentName(spk)}</span>
           </div>
         ))}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#B91C1C', fontWeight: 700 }}>
-          <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#E07A5F' }} />
-          <span>Interruption Overlap</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.75rem', color: '#FF0033', fontWeight: 800 }}>
+          <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#FF0033', boxShadow: '0 0 8px rgba(255, 0, 51, 0.95), 0 0 3px #FF0033', border: '1px solid #FFFFFF' }} />
+          <span>Interruption Overlap (#FF0033)</span>
         </div>
       </div>
     </div>

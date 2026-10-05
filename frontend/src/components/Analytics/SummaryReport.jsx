@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, TrendingUp, AlertTriangle, ShieldCheck, RotateCcw, PlusCircle, Users, Clock, Flame } from 'lucide-react';
+import { Award, TrendingUp, AlertTriangle, ShieldCheck, ShieldAlert, RotateCcw, PlusCircle, Users, Clock, Flame } from 'lucide-react';
 import LorenzChart from './LorenzChart.jsx';
 import InterruptionMatrix from './InterruptionMatrix.jsx';
 import TakeawayCards from './TakeawayCards.jsx';
@@ -265,6 +265,39 @@ export default function SummaryReport({
               {Math.round((metrics.total_silence_time / (metrics.total_discussion_time || 1)) * 100)}%
             </span>
           </div>
+
+          {/* Interruption Collisions Quick Card - Bright Red */}
+          <div className="glass-card" style={{
+            padding: '0.75rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#FFF0F2',
+            border: '1.5px solid rgba(255, 0, 51, 0.45)',
+            boxShadow: '0 2px 10px rgba(255, 0, 51, 0.12)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldAlert size={16} color="#FF0033" strokeWidth={2.6} />
+              <div>
+                <span style={{ fontSize: '0.7rem', color: '#B91C1C', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>Interruption Collisions</span>
+                <p className="font-mono" style={{ fontSize: '0.95rem', fontWeight: 900, color: '#FF0033' }}>
+                  {interruptions.length} events
+                </p>
+              </div>
+            </div>
+            <span style={{
+              fontSize: '0.72rem',
+              color: '#FFFFFF',
+              background: '#FF0033',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '9999px',
+              fontWeight: 800,
+              fontFamily: 'JetBrains Mono, monospace',
+              boxShadow: '0 0 10px rgba(255, 0, 51, 0.7)'
+            }}>
+              #FF0033
+            </span>
+          </div>
         </div>
       </div>
 
@@ -321,11 +354,43 @@ export default function SummaryReport({
                   <td className="font-mono" style={{ padding: '0.75rem 1rem', fontWeight: 800, color: isDominant ? '#DC2626' : '#6B5A4E' }}>
                     {stats.talk_time_pct}%
                   </td>
-                  <td className="font-mono" style={{ padding: '0.75rem 1rem', color: stats.interruptions_initiated > 0 ? '#DC2626' : '#8A7565', fontWeight: stats.interruptions_initiated > 0 ? 800 : 400 }}>
-                    {stats.interruptions_initiated}
+                  <td className="font-mono" style={{ padding: '0.75rem 1rem' }}>
+                    {stats.interruptions_initiated > 0 ? (
+                      <span style={{
+                        background: '#FF0033',
+                        color: '#FFFFFF',
+                        padding: '0.2rem 0.65rem',
+                        borderRadius: '9999px',
+                        fontWeight: 900,
+                        fontSize: '0.82rem',
+                        boxShadow: '0 0 10px rgba(255, 0, 51, 0.75)',
+                        display: 'inline-block',
+                        border: '1px solid #FF3366'
+                      }}>
+                        {stats.interruptions_initiated}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#8A7565' }}>0</span>
+                    )}
                   </td>
-                  <td className="font-mono" style={{ padding: '0.75rem 1rem', color: stats.interruptions_received > 0 ? '#D97706' : '#8A7565', fontWeight: stats.interruptions_received > 0 ? 800 : 400 }}>
-                    {stats.interruptions_received}
+                  <td className="font-mono" style={{ padding: '0.75rem 1rem' }}>
+                    {stats.interruptions_received > 0 ? (
+                      <span style={{
+                        background: '#FF1744',
+                        color: '#FFFFFF',
+                        padding: '0.2rem 0.65rem',
+                        borderRadius: '9999px',
+                        fontWeight: 900,
+                        fontSize: '0.82rem',
+                        boxShadow: '0 0 10px rgba(255, 23, 68, 0.75)',
+                        display: 'inline-block',
+                        border: '1px solid #FF5277'
+                      }}>
+                        {stats.interruptions_received}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#8A7565' }}>0</span>
+                    )}
                   </td>
                 </tr>
               );
@@ -339,6 +404,7 @@ export default function SummaryReport({
         metrics={metrics}
         speakers={speakers}
         seats={seats}
+        interruptions={interruptions}
       />
     </div>
   );

@@ -8,6 +8,7 @@ export default function SeatNode({
   cumulativeTime = 0,
   maxCumulativeTime = 1,
   isInterrupter,
+  isInterrupted,
   speakerIndex = 0
 }) {
   const isAssigned = Boolean(seat.speaker_id);
@@ -26,28 +27,42 @@ export default function SeatNode({
   const bgG = Math.round(253 - intensity * 75);
   const bgB = Math.round(248 - intensity * 115);
 
-  const seatDescription = `Seat ${seat.seat_label}: ${isAssigned ? (seat.student_name || seat.speaker_id) : 'Empty'}, ${talkSeconds}s talk time${isSpeaking ? ', currently speaking' : ''}${isInterrupter ? ', interrupting' : ''}`;
+  const seatDescription = `Seat ${seat.seat_label}: ${isAssigned ? (seat.student_name || seat.speaker_id) : 'Empty'}, ${talkSeconds}s talk time${isSpeaking ? ', currently speaking' : ''}${isInterrupter ? ', interrupting (collision)' : ''}${isInterrupted ? ', interrupted (collision)' : ''}`;
 
   return (
     <div
       role="group"
       tabIndex={0}
       aria-label={seatDescription}
-      className={`seat-node ${isSpeaking ? 'seat-node-active speaking-pulse' : ''}`}
+      className={`seat-node ${isInterrupter ? 'seat-node-interrupter' : isInterrupted ? 'seat-node-interrupted' : isSpeaking ? 'seat-node-active speaking-pulse' : ''}`}
       style={{
         position: 'relative',
         width: '102px',
         height: '94px',
         borderRadius: '1rem',
-        background: isAssigned ? `rgb(${bgR}, ${bgG}, ${bgB})` : '#F5EBE1',
-        border: isSpeaking
+        background: isInterrupter
+          ? '#FFF0F2'
+          : isInterrupted
+          ? '#FFF5F6'
+          : isAssigned
+          ? `rgb(${bgR}, ${bgG}, ${bgB})`
+          : '#F5EBE1',
+        border: isInterrupter
+          ? '3.5px solid #FF0033'
+          : isInterrupted
+          ? '3px dashed #FF0033'
+          : isSpeaking
           ? '2.5px solid #F59E0B'
           : isAssigned && intensity > 0.4
           ? '1.5px solid #E07A5F'
           : isAssigned
           ? '1px solid #E4D0BD'
           : '1.5px dashed #E4D0BD',
-        boxShadow: isAssigned && intensity > 0.05
+        boxShadow: isInterrupter
+          ? '0 0 35px rgba(255, 0, 51, 0.95), 0 0 14px #FF0033'
+          : isInterrupted
+          ? '0 0 25px rgba(255, 0, 51, 0.75), 0 0 10px #FF0033'
+          : isAssigned && intensity > 0.05
           ? `0 0 ${glowRadius}px ${glowSpread}px rgba(224, 122, 95, ${glowAlpha}), 0 2px 8px rgba(92, 64, 40, 0.08)`
           : '0 2px 6px rgba(92, 64, 40, 0.04)',
         display: 'flex',
@@ -62,10 +77,51 @@ export default function SeatNode({
       }}
     >
       {/* Shockwave Pulse Ring on Interruption Collision */}
-      <InterruptionFlash isInterrupter={isInterrupter} />
+      <InterruptionFlash isInterrupter={isInterrupter} isInterrupted={isInterrupted} />
+
+      {/* Interruption Status Overlays */}
+      {isInterrupter && (
+        <div style={{
+          position: 'absolute',
+          top: '-11px',
+          background: '#FF0033',
+          color: '#FFFFFF',
+          padding: '2px 7px',
+          borderRadius: '4px',
+          fontSize: '0.62rem',
+          fontWeight: 900,
+          fontFamily: 'JetBrains Mono, monospace',
+          boxShadow: '0 0 14px rgba(255, 0, 51, 0.95)',
+          zIndex: 35,
+          letterSpacing: '0.04em',
+          border: '1px solid #FFFFFF'
+        }}>
+          💥 INTERRUPTING
+        </div>
+      )}
+
+      {isInterrupted && (
+        <div style={{
+          position: 'absolute',
+          top: '-11px',
+          background: '#FF1744',
+          color: '#FFFFFF',
+          padding: '2px 7px',
+          borderRadius: '4px',
+          fontSize: '0.62rem',
+          fontWeight: 900,
+          fontFamily: 'JetBrains Mono, monospace',
+          boxShadow: '0 0 14px rgba(255, 23, 68, 0.95)',
+          zIndex: 35,
+          letterSpacing: '0.04em',
+          border: '1px solid #FFFFFF'
+        }}>
+          ⚠️ INTERRUPTED
+        </div>
+      )}
 
       {/* Active Speaking Indicator Badge */}
-      {isSpeaking && (
+      {isSpeaking && !isInterrupter && !isInterrupted && (
         <div style={{
           position: 'absolute',
           top: '-8px',
