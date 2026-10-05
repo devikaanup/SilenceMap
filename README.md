@@ -3,6 +3,7 @@
 > **Classroom Discussion Equity Intelligence & Real-Time Seating Heatmap Visualizer**  
 > *Transforming multi-speaker classroom dialogue into actionable participation telemetry, mathematical equity metrics, and frame-accurate seating heatmaps.*
 
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed%20Live-black?style=flat&logo=vercel)](https://silencemap.vercel.app)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue?style=flat&logo=python)](https://python.org)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.5+-EE4C2C?style=flat&logo=pytorch)](https://pytorch.org)
@@ -222,12 +223,15 @@ To enable live local neural diarization via PyAnnote 3.1:
 
 ## 🔗 Interactive Navigation & Hotkeys
 
-| Endpoint / URL | Purpose |
-| :--- | :--- |
-| **`http://localhost:5173/`** | Cinematic Editorial Landing Page & Gaze-Tracking Hero |
-| **`http://localhost:5173/app`** | Silence Map 4-Stage Theater & Equity Dashboard |
-| **`http://localhost:8000/api/health`** | Backend service health check |
-| **`http://localhost:8000/docs`** | Interactive OpenAPI / Swagger UI |
+| Environment | Endpoint / URL | Purpose |
+| :--- | :--- | :--- |
+| **Production (Vercel)** | **[`https://silencemap.vercel.app/`](https://silencemap.vercel.app/)** | Live Production Editorial Landing Page & Gaze-Tracking Hero |
+| **Production (Vercel)** | **[`https://silencemap.vercel.app/app`](https://silencemap.vercel.app/app)** | Live Production Silence Map 4-Stage Theater & Equity Dashboard |
+| **Production (Vercel)** | **[`https://silencemap.vercel.app/api/presets`](https://silencemap.vercel.app/api/presets)** | Serverless Production Presets API |
+| **Local Dev** | **`http://localhost:5173/`** | Local Development Landing Page |
+| **Local Dev** | **`http://localhost:5173/app`** | Local Development Silence Map Theater |
+| **Local Backend** | **`http://localhost:8000/api/health`** | Local Backend FastAPI Health Check |
+| **Local Backend** | **`http://localhost:8000/docs`** | Interactive OpenAPI / Swagger UI |
 
 ### Keyboard Shortcuts (Theater Playback)
 

@@ -31,3 +31,5 @@ frontend_new/test-main/dist/
 backend/.tts_cache/
 
 
+.vercel
+.env*
