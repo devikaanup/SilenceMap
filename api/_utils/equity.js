@@ -120,9 +120,17 @@ export function computeEquityMetrics(segments, interruptions, totalDiscussionTim
   const gini = Math.min(1.0, Math.max(0.0, diffSum / denominator));
 
   let interpretation = "Highly Equitable";
-  if (gini > 0.50) interpretation = "Floor Monopolized";
-  else if (gini > 0.35) interpretation = "Unbalanced";
-  else if (gini > 0.20) interpretation = "Mildly Uneven";
+  if (interruptions.length >= 4) {
+    interpretation = `Contested (${interruptions.length} Collisions)`;
+  } else if (interruptions.length >= 2 && gini < 0.35) {
+    interpretation = `Disrupted (${interruptions.length} Collisions)`;
+  } else if (gini > 0.50) {
+    interpretation = "Floor Monopolized";
+  } else if (gini > 0.35) {
+    interpretation = "Unbalanced";
+  } else if (gini > 0.20) {
+    interpretation = "Mildly Uneven";
+  }
 
   // Lorenz curve
   const sortedDurations = [...durations].sort((a, b) => a - b);
@@ -164,7 +172,21 @@ export function computeEquityMetrics(segments, interruptions, totalDiscussionTim
   // Top speaker headline
   const sortedByTalk = [...speakers].sort((a, b) => speakerTotals[b] - speakerTotals[a]);
   let headline = "Equitable participation across all students.";
-  if (n >= 2 && sortedByTalk.length >= 2) {
+  if (interruptions.length >= 4) {
+    let topInt = null;
+    let maxInt = 0;
+    for (const [s, st] of Object.entries(interruptionStats)) {
+      if (st.initiated > maxInt) {
+        maxInt = st.initiated;
+        topInt = s;
+      }
+    }
+    headline = topInt && maxInt >= 2
+      ? `Contested Floor: ${interruptions.length} speech collisions detected (${topInt} initiated ${maxInt}), compromising turn-taking equity.`
+      : `Contested Floor: ${interruptions.length} speech collisions detected, compromising turn-taking equity.`;
+  } else if (interruptions.length >= 2) {
+    headline = `Conversational Friction: ${interruptions.length} speech collisions occurred during floor transitions.`;
+  } else if (n >= 2 && sortedByTalk.length >= 2) {
     const top2Sum = (speakerTotals[sortedByTalk[0]] || 0) + (speakerTotals[sortedByTalk[1]] || 0);
     const top2Pct = Math.round((top2Sum / (totalSpeech || 1)) * 100);
     if (top2Pct >= 50) {

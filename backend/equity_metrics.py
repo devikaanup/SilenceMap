@@ -21,8 +21,12 @@ def calculate_gini(talk_times: List[float]) -> float:
     gini = (2.0 * weighted_sum) / (n * total_sum) - (n + 1.0) / n
     return round(float(max(0.0, min(1.0, gini))), 4)
 
-def interpret_gini(gini: float) -> str:
-    if gini < 0.20:
+def interpret_gini(gini: float, interruption_count: int = 0) -> str:
+    if interruption_count >= 4:
+        return f"Contested Floor ({interruption_count} Collisions)"
+    elif interruption_count >= 2 and gini < 0.35:
+        return f"Disrupted Dynamics ({interruption_count} Collisions)"
+    elif gini < 0.20:
         return "Highly Equitable"
     elif gini < 0.35:
         return "Healthy Discussion"
@@ -48,7 +52,7 @@ def compute_equity_metrics(
     # 2. Gini & Lorenz curve
     talk_times = [speaker_durations[s] for s in speakers]
     gini = calculate_gini(talk_times)
-    gini_desc = interpret_gini(gini)
+    gini_desc = interpret_gini(gini, len(interruptions))
     
     # Lorenz curve calculation: (0,0) -> cumulative speaker frac vs cumulative talk frac
     lorenz_points: List[LorenzPoint] = [LorenzPoint(speaker_fraction=0.0, talk_time_fraction=0.0)]
@@ -87,12 +91,22 @@ def compute_equity_metrics(
             "interruptions_received": interruption_stats[s]["received"]
         }
         
-    # 5. Top speakers dominance headline (e.g., "2 of 6 participants accounted for 68% of total speaking time")
+    # 5. Top speakers dominance headline
     if speakers:
         sorted_by_talk = sorted(speaker_stats.items(), key=lambda item: item[1]["total_talk_time"], reverse=True)
         top_k = max(1, len(speakers) // 3)
         top_talk_pct = sum(item[1]["talk_time_pct"] for item in sorted_by_talk[:top_k])
-        headline = f"{top_k} of {len(speakers)} participants accounted for {top_talk_pct:.0f}% of total speaking time."
+
+        if len(interruptions) >= 4:
+            top_int = max(interruption_stats.items(), key=lambda item: item[1]["initiated"])
+            if top_int[1]["initiated"] >= 2:
+                headline = f"Contested Floor: {len(interruptions)} speech collisions detected ({top_int[0]} initiated {top_int[1]['initiated']}), disrupting floor equity."
+            else:
+                headline = f"Contested Floor: {len(interruptions)} speech collisions detected, disrupting floor equity."
+        elif len(interruptions) >= 2 and top_talk_pct < 50:
+            headline = f"Conversational Friction: {len(interruptions)} speech collisions occurred during floor transitions."
+        else:
+            headline = f"{top_k} of {len(speakers)} participants accounted for {top_talk_pct:.0f}% of total speaking time."
     else:
         headline = "No speech detected."
         

@@ -23,9 +23,13 @@ export default function SummaryReport({
   const circumference = Math.PI * radius;
   const strokeDashoffset = circumference * (1 - gini);
 
-  // Determine color based on Gini coefficient in warm cozy palette
+  // Determine color based on Gini coefficient & interruptions in warm cozy palette
   let giniColor = '#10B981'; // Sage Emerald (Equal)
-  if (gini >= 0.50) {
+  if (interruptions.length >= 4) {
+    giniColor = '#DC2626'; // Rose/Crimson (Contested/Disrupted)
+  } else if (interruptions.length >= 2) {
+    giniColor = '#E07A5F'; // Terracotta (Friction)
+  } else if (gini >= 0.50) {
     giniColor = '#DC2626'; // Deep Rose (Monopoly)
   } else if (gini >= 0.35) {
     giniColor = '#E07A5F'; // Terracotta (Uneven)
@@ -55,7 +59,7 @@ export default function SummaryReport({
             alignItems: 'center',
             gap: '0.35rem'
           }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: interruptions.length >= 4 ? '#DC2626' : '#10B981' }} />
             <span>Discussion Completed &bull; Telemetry Summary</span>
           </span>
           <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#231A12', marginTop: '0.2rem', fontFamily: 'Playfair Display, Georgia, serif' }}>
@@ -129,33 +133,39 @@ export default function SummaryReport({
 
       {/* Primary Headline Inequality Banner */}
       <div style={{
-        background: gini >= 0.40 ? '#FEF3C7' : '#EEF5F0',
-        border: `1px solid ${gini >= 0.40 ? '#FDE68A' : '#C7DDD0'}`,
+        background: (gini >= 0.35 || interruptions.length >= 3) ? (interruptions.length >= 4 ? '#FFF0F2' : '#FEF3C7') : '#EEF5F0',
+        border: `1px solid ${(gini >= 0.35 || interruptions.length >= 3) ? (interruptions.length >= 4 ? 'rgba(255, 0, 51, 0.4)' : '#FDE68A') : '#C7DDD0'}`,
         borderRadius: '1rem',
         padding: '1.25rem 1.5rem',
         marginBottom: '2rem',
         display: 'flex',
         alignItems: 'center',
         gap: '1rem',
-        boxShadow: '0 2px 8px rgba(92, 64, 40, 0.04)'
+        boxShadow: (interruptions.length >= 4) ? '0 4px 16px rgba(255, 0, 51, 0.1)' : '0 2px 8px rgba(92, 64, 40, 0.04)'
       }}>
         <div style={{
           width: '46px',
           height: '46px',
           borderRadius: '50%',
-          background: gini >= 0.40 ? '#FEE2E2' : '#D1FAE5',
-          color: gini >= 0.40 ? '#DC2626' : '#059669',
+          background: interruptions.length >= 4 ? '#FEE2E2' : (gini >= 0.35 || interruptions.length >= 3) ? '#FEF3C7' : '#D1FAE5',
+          color: interruptions.length >= 4 ? '#FF0033' : (gini >= 0.35 || interruptions.length >= 3) ? '#B45309' : '#059669',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          border: `1px solid ${gini >= 0.40 ? '#FECACA' : '#A7F3D0'}`
+          border: `1px solid ${interruptions.length >= 4 ? '#FECACA' : (gini >= 0.35 || interruptions.length >= 3) ? '#FDE68A' : '#A7F3D0'}`
         }}>
-          {gini >= 0.40 ? <AlertTriangle size={24} /> : <ShieldCheck size={24} />}
+          {interruptions.length >= 4 ? <ShieldAlert size={24} strokeWidth={2.4} /> : (gini >= 0.35 || interruptions.length >= 3) ? <AlertTriangle size={24} /> : <ShieldCheck size={24} />}
         </div>
         <div>
-          <p style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: gini >= 0.40 ? '#B45309' : '#047857', fontFamily: 'JetBrains Mono, monospace' }}>
-            Participation Inequality Headline
+          <p style={{
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            color: interruptions.length >= 4 ? '#DC2626' : (gini >= 0.35 || interruptions.length >= 3) ? '#B45309' : '#047857',
+            fontFamily: 'JetBrains Mono, monospace'
+          }}>
+            {interruptions.length >= 4 ? 'Conversational Collision Warning' : 'Participation Inequality Headline'}
           </p>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#231A12', marginTop: '0.2rem', fontFamily: 'Playfair Display, Georgia, serif' }}>
             {headline}
@@ -219,7 +229,12 @@ export default function SummaryReport({
         <LorenzChart
           lorenzPoints={metrics.lorenz_curve || []}
           giniCoefficient={gini}
+          interruptions={interruptions}
+          speakerStats={speakerStats}
+          speakers={speakers}
+          seats={seats}
         />
+
 
         {/* Discussion Duration Breakdown Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

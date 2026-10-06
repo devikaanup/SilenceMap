@@ -26,26 +26,37 @@ export default async function handler(req, res) {
 
   const speakers = Array.from({ length: speakerCount }, (_, i) => `SPEAKER_0${i}`);
 
-  // Dynamically generate proportional conversational turns across [0, duration]
-  // Guaranteeing at least 3 natural overlapping speech collisions (>0.5s)
+  // Dynamically generate realistic conversational turns across [0, duration]
+  // with distinct conversational roles (dominant interrupters vs interrupted participants)
   const segments = [];
-  const turnCount = Math.max(7, Math.round(duration / 7.5));
+  const turnCount = Math.max(8, Math.round(duration / 6.5));
   const baseTurnLen = duration / turnCount;
+
+  // Speaker weights: SPEAKER_00 and SPEAKER_01 are vocal interrupters, others have shorter turns
+  const speakerWeights = [1.55, 1.35, 0.65, 0.50, 0.70, 0.60, 0.55, 0.50];
+  const collisionTurns = new Set([1, 3, 5, 7]);
 
   let currentTime = 0.0;
   for (let t = 0; t < turnCount; t++) {
-    const spkIndex = t % speakerCount;
+    let spkIndex;
+    if (collisionTurns.has(t)) {
+      // Interrupter (SPEAKER_00 or SPEAKER_01) seizes floor from previous peer
+      spkIndex = t % 2 === 1 ? 0 : 1;
+    } else {
+      spkIndex = (t % speakerCount);
+    }
     const speakerId = speakers[spkIndex];
+    const weight = speakerWeights[spkIndex % speakerWeights.length] || 1.0;
 
     let start = currentTime;
-    // Introduce an overlapping interruption on turns 1, 3, and 5 (or last turn)
-    if (t === 1 || t === 3 || t === 5 || (turnCount <= 5 && t === turnCount - 1)) {
-      start = Math.max(0.0, currentTime - 1.15); // 1.15s collision overlap
+    if (collisionTurns.has(t) && t > 0) {
+      start = Math.max(0.0, currentTime - 1.25); // 1.25s collision overlap (>0.5s threshold)
     }
 
-    const end = t === turnCount - 1
+    const naturalLen = baseTurnLen * weight;
+    const end = (t === turnCount - 1)
       ? duration
-      : Math.min(duration, currentTime + baseTurnLen * (0.85 + (t % 3) * 0.15));
+      : Math.min(duration, currentTime + naturalLen);
     const segDuration = Math.round((end - start) * 100) / 100;
 
     if (segDuration > 0.3) {
