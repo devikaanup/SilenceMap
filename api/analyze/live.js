@@ -36,15 +36,26 @@ export default async function handler(req, res) {
   const speakerWeights = [1.55, 1.35, 0.65, 0.50, 0.70, 0.60, 0.55, 0.50];
   const collisionTurns = new Set([1, 3, 5, 7]);
 
+  const nonCollisionSpeakers = [];
+  for (let s = 2; s < speakerCount; s++) nonCollisionSpeakers.push(s);
+  if (nonCollisionSpeakers.length === 0) nonCollisionSpeakers.push(0, 1);
+
+  let collisionCount = 0;
+  let nonCollisionCount = 0;
   let currentTime = 0.0;
+
   for (let t = 0; t < turnCount; t++) {
     let spkIndex;
     if (collisionTurns.has(t)) {
-      // Interrupter (SPEAKER_00 or SPEAKER_01) seizes floor from previous peer
-      spkIndex = t % 2 === 1 ? 0 : 1;
+      // Alternate between interrupters (0 and 1)
+      spkIndex = collisionCount % Math.min(2, speakerCount);
+      collisionCount++;
     } else {
-      spkIndex = (t % speakerCount);
+      // Cycle through other peers (2, 3...)
+      spkIndex = nonCollisionSpeakers[nonCollisionCount % nonCollisionSpeakers.length];
+      nonCollisionCount++;
     }
+
     const speakerId = speakers[spkIndex];
     const weight = speakerWeights[spkIndex % speakerWeights.length] || 1.0;
 
