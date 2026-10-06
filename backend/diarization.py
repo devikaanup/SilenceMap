@@ -28,8 +28,12 @@ def get_available_presets() -> List[Dict[str, Any]]:
     return presets
 
 def load_preset_data(preset_id: str) -> AnalysisResponse:
-    json_path = PRESETS_DIR / f"{preset_id}.json"
-    if not json_path.exists():
+    safe_id = Path(preset_id).name
+    if not safe_id or safe_id != preset_id:
+        raise FileNotFoundError(f"Invalid preset identifier '{preset_id}'")
+
+    json_path = (PRESETS_DIR / f"{safe_id}.json").resolve()
+    if not json_path.exists() or not json_path.is_relative_to(PRESETS_DIR.resolve()):
         raise FileNotFoundError(f"Preset '{preset_id}' not found.")
     
     with open(json_path, "r") as f:

@@ -44,13 +44,22 @@ export function useAudioSync({ audioRef, segments = [], interruptions = [], tota
         }
       }
     }
-    setActiveSpeakers(active);
+    setActiveSpeakers((prev) => {
+      if (prev.length === active.length && prev.every((spk, idx) => spk === active[idx])) {
+        return prev;
+      }
+      return active;
+    });
 
     // 2. Identify active interruption collision at time t
     const activeInt = interruptions.find(
       (intEvt) => t >= intEvt.start_time && t <= intEvt.end_time
-    );
-    setActiveInterruption(activeInt || null);
+    ) || null;
+    setActiveInterruption((prev) => {
+      if (prev === activeInt) return prev;
+      if (prev && activeInt && prev.id === activeInt.id) return prev;
+      return activeInt;
+    });
 
     // 3. Compute cumulative talk time per speaker up to time t
     const cumTimes = {};

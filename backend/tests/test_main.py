@@ -61,7 +61,7 @@ def test_analyze_live_fails_cleanly_without_token(monkeypatch):
     assert data["error_code"] == "HF_AUTH_REQUIRED"
     assert "HF_TOKEN" in data["error_message"] or "HF_AUTH_REQUIRED" in data["error_message"]
 
-def test_seat_mapping():
+def test_seat_mapping_array_format():
     payload = [
         {"seat_id": "seat_1", "seat_label": "Seat 1", "speaker_id": "SPEAKER_00", "student_name": "Alex"},
         {"seat_id": "seat_2", "seat_label": "Seat 2", "speaker_id": "SPEAKER_01", "student_name": "Maya"}
@@ -69,3 +69,34 @@ def test_seat_mapping():
     res = client.post("/api/seat-mapping", json=payload)
     assert res.status_code == 200
     assert res.json()["mapped_count"] == 2
+    assert res.json()["status"] == "success"
+
+def test_seat_mapping_object_format():
+    payload = {
+        "session_id": "test-session-123",
+        "seats": [
+            {"seat_id": "seat_1", "seat_label": "Seat 1", "speaker_id": "SPEAKER_00", "student_name": "Alex"},
+            {"seat_id": "seat_2", "seat_label": "Seat 2", "speaker_id": "SPEAKER_01", "student_name": "Maya"},
+            {"seat_id": "seat_3", "seat_label": "Seat 3", "speaker_id": "SPEAKER_02", "student_name": "Jordan"}
+        ]
+    }
+    res = client.post("/api/seat-mapping", json=payload)
+    assert res.status_code == 200
+    assert res.json()["mapped_count"] == 3
+    assert res.json()["session_id"] == "test-session-123"
+
+def test_seat_mapping_invalid_payload():
+    res = client.post("/api/seat-mapping", json={"invalid_field": 123})
+    assert res.status_code in [400, 422]
+
+def test_audio_serve_path_traversal_prevention():
+    # Attempt directory traversal attacks
+    res = client.get("/api/audio/../main.py")
+    assert res.status_code in [400, 404]
+    
+    res = client.get("/api/audio/....//etc/passwd")
+    assert res.status_code in [400, 404]
+
+def test_preset_path_traversal_prevention():
+    res = client.post("/api/analyze/preset/../main")
+    assert res.status_code in [400, 404]

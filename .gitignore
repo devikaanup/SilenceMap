@@ -32,4 +32,7 @@ backend/.tts_cache/
 
 
 .vercel
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example

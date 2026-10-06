@@ -21,6 +21,10 @@ class SeatAssignment(BaseModel):
     speaker_id: Optional[str] = None
     student_name: Optional[str] = None
 
+class SeatMappingRequest(BaseModel):
+    session_id: Optional[str] = "session_default"
+    seats: List[SeatAssignment]
+
 class LorenzPoint(BaseModel):
     speaker_fraction: float
     talk_time_fraction: float

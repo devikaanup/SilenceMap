@@ -10,8 +10,11 @@ export default function handler(req, res) {
   const targetId = presetId || (req.body && req.body.preset_id) || 'socratic_seminar';
 
   if (!PRESETS_DATA[targetId]) {
-    // If not found directly, default to socratic_seminar or return 404
-    return res.status(200).json(loadPresetResponse('socratic_seminar'));
+    return res.status(404).json({
+      status: 'error',
+      error_code: 'PRESET_NOT_FOUND',
+      error_message: `Preset '${targetId}' not found`
+    });
   }
 
   const response = loadPresetResponse(targetId);

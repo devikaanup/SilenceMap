@@ -1,11 +1,25 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileAudio, ArrowRight, Users, Loader2 } from 'lucide-react';
+import { UploadCloud, FileAudio, ArrowRight, Users, Loader2, AlertCircle } from 'lucide-react';
 
 export default function AudioUploader({ onUpload, isLoading }) {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState(null);
   const [numSpeakers, setNumSpeakers] = useState('');
+  const [fileError, setFileError] = useState(null);
   const inputRef = useRef(null);
+
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+  const validateAndSetFile = (selectedFile) => {
+    setFileError(null);
+    if (!selectedFile) return;
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setFileError('File exceeds 50MB limit. Please upload a shorter discussion audio file.');
+      setFile(null);
+      return;
+    }
+    setFile(selectedFile);
+  };
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -22,20 +36,20 @@ export default function AudioUploader({ onUpload, isLoading }) {
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+      validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleChange = (e) => {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      validateAndSetFile(e.target.files[0]);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file || fileError) return;
     onUpload(file, numSpeakers ? parseInt(numSpeakers, 10) : null);
   };
 
@@ -65,12 +79,42 @@ export default function AudioUploader({ onUpload, isLoading }) {
           Upload a multi-speaker classroom discussion (.wav, .mp3, .m4a). The server will perform voice activity filtering, diarization, and collision detection.
         </p>
 
+        {fileError && (
+          <div
+            role="alert"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '0.75rem',
+              background: '#FEE2E2',
+              border: '1px solid #FCA5A5',
+              color: '#991B1B',
+              fontSize: '0.85rem',
+              marginBottom: '1rem'
+            }}
+          >
+            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <span>{fileError}</span>
+          </div>
+        )}
+
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload discussion audio file"
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
           style={{
             border: `2px dashed ${dragActive ? '#D97706' : file ? '#E07A5F' : '#E4D0BD'}`,
             borderRadius: '1rem',
@@ -79,7 +123,8 @@ export default function AudioUploader({ onUpload, isLoading }) {
             cursor: 'pointer',
             background: dragActive ? '#FEF3C7' : file ? '#FAF4ED' : '#FAF3EB',
             transition: 'all 0.2s ease',
-            marginBottom: '1.5rem'
+            marginBottom: '1.5rem',
+            outline: 'none'
           }}
         >
           <input

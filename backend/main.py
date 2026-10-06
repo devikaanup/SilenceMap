@@ -2,8 +2,8 @@ import os
 import uuid
 import shutil
 from pathlib import Path
-from typing import Optional, List
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from typing import Optional, List, Union
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -20,7 +20,7 @@ def _load_env_file():
 
 _load_env_file()
 
-from backend.models import AnalysisResponse, EquityMetrics, SeatAssignment
+from backend.models import AnalysisResponse, EquityMetrics, SeatAssignment, SeatMappingRequest
 from backend.diarization import get_available_presets, load_preset_data, run_live_diarization, PRESETS_DIR
 from backend.interruption_detector import detect_interruptions, ensure_at_least_three_interruptions
 from backend.equity_metrics import compute_equity_metrics
@@ -28,15 +28,22 @@ from backend.audio_processor import ensure_wav_16k_mono
 
 app = FastAPI(title="Silence Map API", version="1.0.0")
 
+import tempfile
+
+cors_origins_env = os.getenv("CORS_ORIGINS", "*")
+allowed_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+is_wildcard = "*" in allowed_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=["*"] if is_wildcard else allowed_origins,
+    allow_credentials=not is_wildcard,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = Path("/tmp/silence_map_uploads")
+DEFAULT_UPLOAD_DIR = Path(tempfile.gettempdir()) / "silence_map_uploads"
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(DEFAULT_UPLOAD_DIR)))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @app.get("/api/health")
@@ -49,15 +56,18 @@ def list_presets():
 
 @app.api_route("/api/audio/{filename}", methods=["GET", "HEAD"])
 def serve_audio(filename: str):
-    # Check presets directory first
+    # Sanitize filename - strip path traversal characters
+    safe_name = Path(filename).name
+    if not safe_name or safe_name != filename:
+        raise HTTPException(status_code=400, detail="Invalid audio filename")
+
     no_cache = {"Cache-Control": "no-cache, must-revalidate"}
-    preset_path = PRESETS_DIR / filename
-    if preset_path.exists():
+    preset_path = (PRESETS_DIR / safe_name).resolve()
+    if preset_path.exists() and preset_path.is_relative_to(PRESETS_DIR.resolve()):
         return FileResponse(str(preset_path), media_type="audio/wav", headers=no_cache)
     
-    # Check upload directory
-    upload_path = UPLOAD_DIR / filename
-    if upload_path.exists():
+    upload_path = (UPLOAD_DIR / safe_name).resolve()
+    if upload_path.exists() and upload_path.is_relative_to(UPLOAD_DIR.resolve()):
         return FileResponse(str(upload_path), media_type="audio/wav", headers=no_cache)
     
     raise HTTPException(status_code=404, detail="Audio file not found")
@@ -75,7 +85,8 @@ async def analyze_live(
     num_speakers: Optional[int] = Form(None)
 ):
     session_id = f"live_{uuid.uuid4().hex[:8]}"
-    raw_path = UPLOAD_DIR / f"{session_id}_raw_{file.filename}"
+    safe_file_name = Path(file.filename or "audio").name
+    raw_path = UPLOAD_DIR / f"{session_id}_raw_{safe_file_name}"
     clean_path = UPLOAD_DIR / f"{session_id}.wav"
     
     try:
@@ -104,6 +115,13 @@ async def analyze_live(
             error_code="AUDIO_DECODE_FAILED",
             error_message=f"Failed to process audio format: {str(e)}"
         )
+    finally:
+        # Clean up temporary raw upload file to prevent disk exhaustion
+        if raw_path.exists():
+            try:
+                raw_path.unlink()
+            except OSError:
+                pass
 
     # Execute Diarization with explicit failure handling
     try:
@@ -148,9 +166,19 @@ async def analyze_live(
         )
 
 @app.post("/api/seat-mapping")
-def save_seat_mapping(assignments: List[SeatAssignment]):
+def save_seat_mapping(payload: Union[List[SeatAssignment], SeatMappingRequest] = Body(...)):
+    # Support both list payload and { "session_id": "...", "seats": [...] } object payload
+    if isinstance(payload, list):
+        assignments = payload
+        session_id = "session_default"
+    else:
+        assignments = payload.seats
+        session_id = payload.session_id or "session_default"
+
     return {
         "status": "success",
+        "session_id": session_id,
         "mapped_count": len([a for a in assignments if a.speaker_id is not None]),
-        "assignments": [a.model_dump() for a in assignments]
+        "assignments": [a.model_dump() for a in assignments],
+        "seats": [a.model_dump() for a in assignments]
     }

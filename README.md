@@ -10,7 +10,7 @@
 [![PyAnnote](https://img.shields.io/badge/PyAnnote-3.1-orange?style=flat)](https://github.com/pyannote/pyannote-audio)
 [![React](https://img.shields.io/badge/React-18.0+-61DAFB?style=flat&logo=react)](https://reactjs.org)
 [![Vite](https://img.shields.io/badge/Vite-5.4+-646CFF?style=flat&logo=vite)](https://vitejs.dev)
-[![Pytest](https://img.shields.io/badge/Pytest-26%2F26%20Passing-brightgreen?style=flat&logo=pytest)](https://pytest.org)
+[![Pytest](https://img.shields.io/badge/Pytest-30%2F30%20Passing-brightgreen?style=flat&logo=pytest)](https://pytest.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 ---
@@ -417,10 +417,10 @@ backend/tests/test_audio_processor.py ........ [PASS] - Sample rates, mono conve
 backend/tests/test_diarization.py ............ [PASS] - Fallback loaders & segment parsing
 backend/tests/test_equity_metrics.py ......... [PASS] - Gini index edge cases (0.0 to 1.0)
 backend/tests/test_interruption_detector.py .. [PASS] - Interruption collision detection & overlap filters
-backend/tests/test_main.py ................... [PASS] - Health, preset, live, and seating endpoints
+backend/tests/test_main.py ................... [PASS] - Health, presets, path traversal defense, and seating contracts
 backend/tests/test_models.py ................. [PASS] - Pydantic data serialization validation
 
-============================== 26 passed in 1.11s ==============================
+============================== 30 passed in 1.09s ==============================
 ```
 
 ### Frontend Build Verification

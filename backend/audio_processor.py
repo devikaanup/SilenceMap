@@ -11,6 +11,9 @@ def get_audio_duration(file_path: str) -> float:
 def ensure_wav_16k_mono(input_path: str, output_path: str) -> Tuple[str, float]:
     data, sample_rate = sf.read(input_path)
     
+    if data is None or len(data) == 0:
+        raise ValueError("Audio file contains no audio samples.")
+
     # Convert multi-channel / stereo to mono
     if len(data.shape) > 1:
         data = np.mean(data, axis=1)
