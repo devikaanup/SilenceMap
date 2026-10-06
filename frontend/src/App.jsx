@@ -560,7 +560,7 @@ export default function App() {
           <span>Silence Map &bull; Made with love, by Devika Anup</span>
         </div>
         <div>
-          Built with React, FastAPI, WebRTC VAD, and pyannote-audio neural diarization.
+          Python &middot; FastAPI &middot; PyTorch &middot; PyAnnote 3.1 &middot; React &middot; Vite &middot; Pytest
         </div>
       </footer>
     </div>

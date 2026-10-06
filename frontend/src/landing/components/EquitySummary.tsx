@@ -296,8 +296,8 @@ export const EquitySummary: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>Silence Map &bull; Made with love, by Devika Anup</span>
             </div>
-            <p className="text-[#8C7A6D] text-[10px] sm:text-[11px]">
-              Built with React, FastAPI, WebRTC VAD, and pyannote-audio neural diarization.
+            <p className="text-[#8C7A6D] text-[10px] sm:text-[11px] tracking-wide">
+              Python &middot; FastAPI &middot; PyTorch &middot; PyAnnote 3.1 &middot; React &middot; Vite &middot; Pytest
             </p>
           </div>
         </footer>
